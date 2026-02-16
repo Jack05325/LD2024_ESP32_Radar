@@ -1,0 +1,131 @@
+esphome:
+  name: ld2420_radar
+  platformio_options:
+    build_flags: 
+      -DARDUINO_USB_CDC_ON_BOOT=1
+      -DARDUINO_USB_MODE=1
+  on_boot:
+    priority: -100
+    then:
+      - logger.log: "Boot completato in modalità sicura"
+
+esp32:
+  board: esp32-s3-devkitc-1
+  variant: esp32s3
+  framework:
+    type: arduino
+
+wifi:
+  ssid: !secret ssid
+  password: !secret wifi_psw
+
+ota:
+  - platform: esphome
+    password: !secret ota_psw
+
+api:
+  encryption:
+    key: "tD4JJkO0P1YAfMLdvpjBFxyPb4QR+PrrIR6dX85RqXE="
+
+web_server:
+  port: 80
+  auth:
+    username: admin
+    password: "admin"
+
+logger:
+  baud_rate: 115200
+
+deep_sleep:
+  id: deep_sleep_1
+  run_duration: 10s         # tempo in cui resta sveglio per leggere/sincronizzare
+  sleep_duration: 30s       # si ri-sveglia comunque ogni 30 secondi
+  wakeup_pin:
+    number: GPIO16          # pin esterno che può risvegliare anche prima del timer
+  wakeup_pin_mode: INVERT_WAKEUP
+
+
+uart:
+  id: ld2420_uart
+  tx_pin: GPIO17   # ESP32 → LD2420_RX
+  rx_pin: GPIO18   # ESP32 ← LD2420_TX
+  baud_rate: 115200
+  parity: NONE
+  stop_bits: 1
+
+ld2420:
+  uart_id: ld2420_uart
+
+i2c:
+  sda: 10
+  scl: 11
+  scan: true
+  id: bus_a
+
+text_sensor:
+  - platform: ld2420
+    fw_version:
+      name: Versione firmware
+
+sensor:
+  - platform: ld2420
+    moving_distance:
+      name: Distanza di movimento
+  
+  - platform: aht10
+    variant: AHT20
+    i2c_id: bus_a
+    temperature:
+      name: "Temperature"
+    humidity:
+      name: "Humidity"
+    update_interval: 10s
+
+binary_sensor:
+  - platform: ld2420
+    has_target:
+      name: Presenza
+
+  #- platform: gpio
+  #  pin:
+  #    number: GPIO16
+  #    mode: INPUT_PULLUP
+  #  name: "Stato GPIO16"
+  #  id: "deep_sleep_pin"
+  #  device_class: opening
+
+switch:
+  - platform: restart
+    name: Riavvio nodo ESPHome
+
+select:
+  - platform: ld2420
+    operating_mode:
+      name: Modalità operativa
+
+number:
+  - platform: ld2420
+    presence_timeout:
+      name: Timeout di rilevazione presenza
+    min_gate_distance:
+      name: Distanza minima gate
+    max_gate_distance:
+      name: Distanza massima gate
+    gate_select:
+      name: Selezione gate
+    still_threshold:
+      name: Impostazione soglia immobilità
+    move_threshold:
+      name: Impostazione soglia movimento
+
+button:
+  - platform: ld2420
+    apply_config:
+      name: Applica configurazione
+    factory_reset:
+      name: Reset a impostazioni di fabbrica
+    restart_module:
+      name: Riavvio modulo
+    revert_config:
+      name: Undo modifiche
+
