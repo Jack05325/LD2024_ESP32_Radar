@@ -1,0 +1,9 @@
+### Missing 3D models - created on 2025-04-19 22:11
+### Printed by checking_3D_models plugin
+Board file: /Users/giacomodemitri/Documents/LD2420_Radar_ESP32/LD2420_Radar_ESP32.kicad_pcb
+3D missing models written to:
+/Users/giacomodemitri/Documents/LD2420_Radar_ESP32/LD2420_Radar_ESP32_missing3Dmodels.txt
+-------
+-------
+NUM of 3D missing models:0
+checked extensions ['.stp', '.step', '.stpZ']
